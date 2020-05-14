@@ -1,7 +1,7 @@
 package java_prob.LinkedList;
 
 public class SumLists {
-
+    // backward sum
     // iterative
     private LinkedList.Node sum_iterative(LinkedList.Node n1, LinkedList.Node n2) {
 
@@ -65,6 +65,79 @@ public class SumLists {
 
     }
 
+
+    // forward sum
+    class PartialSum{
+        LinkedList.Node sum = null;
+        int carry = 0;
+    }
+
+    private LinkedList.Node forward_sum(LinkedList.Node n1, LinkedList.Node n2){
+
+        int l1 = get_len(n1);
+        int l2 = get_len(n2);
+
+        if(l1 > l2){
+            n2 = add_padding(n2, l1-l2);
+        }else{
+            n1 = add_padding(n1, l2-l1);
+        }
+
+        PartialSum sum = add_lists(n1, n2);
+
+        if(sum.carry != 0){
+            return insertBefore(sum.sum, sum.carry);
+        }else{
+            return sum.sum;
+        }
+
+    }
+
+    private PartialSum add_lists(LinkedList.Node n1, LinkedList.Node n2) {
+
+        if(n1 == null && n2 == null){
+            return new PartialSum();
+        }
+
+        PartialSum sum = add_lists(n1.next, n2.next);
+
+        int val = n1.data + n2.data + sum.carry;
+
+        sum.sum = insertBefore(sum.sum, val % 10);
+        sum.carry = val / 10;
+
+        return sum;
+    }
+
+
+    private LinkedList.Node add_padding(LinkedList.Node node, int len) {
+        for(int i=0; i<len; i++){
+            node = insertBefore(node, 0);
+        }
+        return node;
+    }
+
+    private LinkedList.Node insertBefore(LinkedList.Node node, int data) {
+
+        if(node == null){
+            return new LinkedList.Node(data);
+        }
+
+        LinkedList.Node head = new LinkedList.Node(data);
+        head.next = node;
+
+        return head;
+    }
+
+    private int get_len(LinkedList.Node n1) {
+        int i = 0;
+        while(n1 != null){
+            i++;
+            n1 = n1.next;
+        }
+        return i;
+    }
+
     public static void main(String args[]) {
         LinkedList ll = new LinkedList();
         ll.head = new LinkedList.Node(4);
@@ -75,7 +148,7 @@ public class SumLists {
         ll1.head.next = new LinkedList.Node(8);
 
         SumLists sumLists = new SumLists();
-        LinkedList.Node result = sumLists.sum_recursive(ll.head, ll1.head, 0);
+        LinkedList.Node result = sumLists.forward_sum(ll.head, ll1.head);
 
         while (result != null) {
             System.out.println(result.data);
